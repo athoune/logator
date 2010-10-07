@@ -12,6 +12,8 @@ import parser
 RE_COMMON = re.compile('(.*?) - (.*?) \[(.*?) [+-]\d{4}\] "(.*?) (.*?) (.*?)" (\d{3}) (\d+)', re.U)
 RE_COMBINED = re.compile('(.*?) - (.*?) \[(.*?) [+-]\d{4}\] "(.*?) (.*?) (.*?)" (\d{3}) (.*?) "([^"]*)" "([^"]*)"', re.U)
 RE_LIGHTY = re.compile('(.*?) (.*?) - \[(.*?) [+-]\d{4}\] "(.*?) (.*?) (.*?)" (\d{3}) (.*?) "([^"]*)" "([^"]*)"', re.U)
+RE_OS = re.compile('(.*?) \((.*?)\)', re.U)
+RE_MOZILLA = re.compile('.*? \((.*?); U; (.*?);', re.U)
 
 def common(line):
 	m = RE_COMMON.match(line)
@@ -59,6 +61,15 @@ def lighttpd(line):
 		'referer':m.group(9),
 		'user-agent':m.group(10)
 		}
+def os(ua):
+	m = RE_OS.match(ua)
+	infos = {}
+	if m != None:
+		args = m.group(2).split('; ')
+		if args[1] == 'U':
+			infos['os'] = args[0]
+			infos['os-version'] = args[2]
+	return infos
 
 if __name__ == '__main__':
 	import log
@@ -75,5 +86,5 @@ if __name__ == '__main__':
 82.227.122.98 blog.garambrogne.net - [07/Oct/2010:20:26:52 +0200] "GET /themes/garambrogne/img/retrolien.png HTTP/1.1" 304 0 "http://blog.garambrogne.net/" "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_4; fr-fr) AppleWebKit/533.18.1 (KHTML, like Gecko) Version/5.0.2 Safari/533.18.5"
 """[1:-1].split("\n")
 	for line in log.log(logs, lighttpd):
-		line['user-agent'] = parser.UserAgent(line['user-agent']).pretty()
-		print line['user-agent']
+		print parser.UserAgent(line['user-agent']).pretty()
+		print os(line['user-agent'])
