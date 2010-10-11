@@ -105,16 +105,50 @@ class Lighttpd(LogLine):
 		}
 
 
-class Filter_by_code(object):
-	def __init__(self, codes = [404]):
-		self.codes = codes
+class MetaFilter:
+	def __init__(self, filter_):
+		self.filters = [filter_]
+	def append(self, other):
+		self.filters.append(other)
+	def __or__(self,other):
+		self.append(other)
+		return self
+	def __call__(self, data):
+		for filter_ in self.filters:
+			data = filter_.__call__(data)
+			if data == None: return None
+		return data
+
+
+class Filter(object):
+	def __or__(self, other):
+		meta = MetaFilter(self)
+		meta.append(other)
+		return meta
+
+class Filter_by_attribute(Filter):
+	def __init__(self, key, value):
+		self.key = key
+		self.value = value
 	def __call__(self, logline):
-		if logline.code in self.codes:
+		if logline.__getattr__(self.key) in self.value:
 			return logline
+
+class Filter_by_code(Filter_by_attribute):
+	def __init__(self, codes = [404]):
+		self.key = 'code'
+		self.value = codes
 
 class Filter_by_error(Filter_by_code):
 	def __init__(self):
 		Filter_by_code.__init__(self, [403, 404, 500, 501, 502])
+
+class Filter_by_domain(Filter):
+	def __init__(self, domain=['net']):
+		self.domain = domain
+	def __call__(self, logline):
+		if logline.hostByName.split('.')[-1] in self.domain:
+			return logline
 
 if __name__ == '__main__':
 	import log
@@ -160,5 +194,5 @@ if __name__ == '__main__':
 	class Line(Lighttpd, UserAgent, HostByName):
 		pass
 	
-	for line in log.log(Line, logs, Filter_by_code([304])):
-		print line.url, line.userAgent.pretty(), line.os #line.hostByName
+	for line in log.log(Line, logs, Filter_by_code([200]) | Filter_by_attribute('command', 'GET')):
+		print line.url, line.userAgent.pretty(), line.os#, line.hostByName
