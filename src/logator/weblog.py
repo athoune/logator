@@ -125,6 +125,5 @@ if __name__ == '__main__':
 	class Line(Lighttpd, UserAgent):
 		pass
 	
-	for line in logs:
-		l = Line(line)
-		print l.userAgent().pretty(), l.os()
+	for line in log.log(Line, logs):
+		print line.userAgent().pretty(), line.os()

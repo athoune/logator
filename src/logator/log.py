@@ -3,6 +3,6 @@
 
 __author__ = "Mathieu Lecarme <mathieu@garambrogne.net>"
 
-def log(reader, parser, filter = {}):
+def log(parser, reader, filter = {}):
 	for line in reader:
 		yield parser.__call__(line)
