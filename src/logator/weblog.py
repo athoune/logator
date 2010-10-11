@@ -15,9 +15,27 @@ RE_LIGHTY = re.compile('(.*?) (.*?) - \[(.*?) [+-]\d{4}\] "(.*?) (.*?) (.*?)" (\
 RE_OS = re.compile('(.*?) \((.*?)\)', re.U)
 RE_MOZILLA = re.compile('.*? \((.*?); U; (.*?);', re.U)
 
-def common(line):
-	m = RE_COMMON.match(line)
-	return {
+class LogLine(object):
+	def __init__(self, line):
+		self.datas = self.parse(line)
+	def os(self):
+		m = RE_OS.match(self.datas['user-agent'])
+		infos = {}
+		if m != None:
+			args = m.group(2).split('; ')
+			if len(args) > 1 and args[1] == 'U':
+				infos['os'] = args[0]
+				infos['os-version'] = args[2]
+		return infos
+
+class UserAgent(object):
+	def userAgent(self):
+		return parser.UserAgent(self.datas['user-agent'])
+
+class Common(LogLine):
+	def parse(self, line):
+		m = RE_COMMON.match(line)
+		return {
 		'ip':     m.group(1),
 		'user':   m.group(2),
 		'date':   datetime.strptime(m.group(3), '%d/%b/%Y:%H:%M:%S'),
@@ -47,9 +65,10 @@ def combined(line):
 		'referer':m.group(9),
 		'user-agent':userAgent.match(m.group(10))
 		}
-def lighttpd(line):
-	m = RE_LIGHTY.match(line)
-	return {
+class Lighttpd(LogLine):
+	def parse(self, line):
+		m = RE_LIGHTY.match(line)
+		return {
 		'ip':     m.group(1),
 		'domain': m.group(2),
 		'date':   datetime.strptime(m.group(3), '%d/%b/%Y:%H:%M:%S'),
@@ -61,15 +80,6 @@ def lighttpd(line):
 		'referer':m.group(9),
 		'user-agent':m.group(10)
 		}
-def os(ua):
-	m = RE_OS.match(ua)
-	infos = {}
-	if m != None:
-		args = m.group(2).split('; ')
-		if args[1] == 'U':
-			infos['os'] = args[0]
-			infos['os-version'] = args[2]
-	return infos
 
 if __name__ == '__main__':
 	import log
@@ -111,6 +121,10 @@ if __name__ == '__main__':
 82.227.122.98 blog.garambrogne.net - [07/Oct/2010:22:40:44 +0200] "GET /index.php?feed/rss2 HTTP/1.1" 304 0 "-" "Apple-PubSub/65.20"
 178.79.135.218 blog.garambrogne.net - [07/Oct/2010:22:40:47 +0200] "HEAD / HTTP/1.1" 200 0 "-" "Mozilla/5.0 (compatible; Wasitup monitoring; http://wasitup.com)"
 """[1:-1].split("\n")
-	for line in log.log(logs, lighttpd):
-		print parser.UserAgent(line['user-agent']).pretty()
-		print os(line['user-agent'])
+
+	class Line(Lighttpd, UserAgent):
+		pass
+	
+	for line in logs:
+		l = Line(line)
+		print l.userAgent().pretty(), l.os()
