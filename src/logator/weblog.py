@@ -36,6 +36,8 @@ class LogLine(object):
 				infos['os'] = args[0]
 				infos['os-version'] = args[2]
 		return infos
+	def __repr__(self):
+		return "<LogLine %s>" % self.datas['url']
 
 class UserAgent(object):
 	def get_userAgent(self):
@@ -49,6 +51,8 @@ class HostByName(object):
 			return socket.gethostbyaddr(self.datas['ip'])[0]
 		except socket.herror:
 			return '?'
+
+
 
 def intOrNull(a):
 	if a == '-': return None
@@ -100,6 +104,18 @@ class Lighttpd(LogLine):
 		'user-agent':m.group(10)
 		}
 
+
+class Filter_by_code(object):
+	def __init__(self, codes = [404]):
+		self.codes = codes
+	def __call__(self, logline):
+		if logline.code in self.codes:
+			return logline
+
+class Filter_by_error(Filter_by_code):
+	def __init__(self):
+		Filter_by_code.__init__(self, [403, 404, 500, 501, 502])
+
 if __name__ == '__main__':
 	import log
 	logs = """
@@ -144,5 +160,5 @@ if __name__ == '__main__':
 	class Line(Lighttpd, UserAgent, HostByName):
 		pass
 	
-	for line in log.log(Line, logs):
-		print line.url, line.hostByName, line.userAgent.pretty(), line.os
+	for line in log.log(Line, logs, Filter_by_code([304])):
+		print line.url, line.userAgent.pretty(), line.os #line.hostByName
