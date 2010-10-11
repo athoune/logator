@@ -20,6 +20,8 @@ class LogLine(object):
 		self.datas = self.parse(line)
 		self._cache = {}
 	def __getattr__(self, name):
+		if name in self.datas:
+			return self.datas[name]
 		if name not in self._cache:
 			self._cache[name] = self.__getattribute__("get_%s" % name).__call__()
 		return self._cache[name]
@@ -38,6 +40,10 @@ class UserAgent(object):
 	def get_userAgent(self):
 		return parser.UserAgent(self.datas['user-agent'])
 
+def intOrNull(a):
+	if a == '-': return None
+	return int(a)
+
 class Common(LogLine):
 	def parse(self, line):
 		m = RE_COMMON.match(line)
@@ -51,9 +57,6 @@ class Common(LogLine):
 		'code':   int(m.group(7)),
 		'size':   int(m.group(8))
 		}
-def intOrNull(a):
-	if a == '-': return None
-	return int(a)
 def combined(line):
 	m = RE_COMBINED.match(line)
 	if m == None:
@@ -69,7 +72,7 @@ def combined(line):
 		'code':   int(m.group(7)),
 		'size':   intOrNull(m.group(8)),
 		'referer':m.group(9),
-		'user-agent':userAgent.match(m.group(10))
+		'user-agent':m.group(10)
 		}
 class Lighttpd(LogLine):
 	def parse(self, line):
@@ -132,4 +135,4 @@ if __name__ == '__main__':
 		pass
 	
 	for line in log.log(Line, logs):
-		print line.userAgent.pretty(), line.os
+		print line.url, line.userAgent.pretty(), line.os
