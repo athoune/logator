@@ -5,6 +5,7 @@ __author__ = "Mathieu Lecarme <mathieu@garambrogne.net>"
 
 import re
 from datetime import datetime
+import socket
 
 import regexes
 import parser
@@ -39,6 +40,15 @@ class LogLine(object):
 class UserAgent(object):
 	def get_userAgent(self):
 		return parser.UserAgent(self.datas['user-agent'])
+
+socket.setdefaulttimeout(2)
+
+class HostByName(object):
+	def get_hostByName(self):
+		try:
+			return socket.gethostbyaddr(self.datas['ip'])[0]
+		except socket.herror:
+			return '?'
 
 def intOrNull(a):
 	if a == '-': return None
@@ -131,8 +141,8 @@ if __name__ == '__main__':
 178.79.135.218 blog.garambrogne.net - [07/Oct/2010:22:40:47 +0200] "HEAD / HTTP/1.1" 200 0 "-" "Mozilla/5.0 (compatible; Wasitup monitoring; http://wasitup.com)"
 """[1:-1].split("\n")
 
-	class Line(Lighttpd, UserAgent):
+	class Line(Lighttpd, UserAgent, HostByName):
 		pass
 	
 	for line in log.log(Line, logs):
-		print line.url, line.userAgent.pretty(), line.os
+		print line.url, line.hostByName, line.userAgent.pretty(), line.os
