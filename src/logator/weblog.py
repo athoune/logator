@@ -18,7 +18,13 @@ RE_MOZILLA = re.compile('.*? \((.*?); U; (.*?);', re.U)
 class LogLine(object):
 	def __init__(self, line):
 		self.datas = self.parse(line)
-	def os(self):
+		self._cache = {}
+	def __getattr__(self, name):
+		if name not in self._cache:
+			self._cache[name] = self.__getattribute__("get_%s" % name).__call__()
+		return self._cache[name]
+			
+	def get_os(self):
 		m = RE_OS.match(self.datas['user-agent'])
 		infos = {}
 		if m != None:
@@ -29,7 +35,7 @@ class LogLine(object):
 		return infos
 
 class UserAgent(object):
-	def userAgent(self):
+	def get_userAgent(self):
 		return parser.UserAgent(self.datas['user-agent'])
 
 class Common(LogLine):
@@ -126,4 +132,4 @@ if __name__ == '__main__':
 		pass
 	
 	for line in log.log(Line, logs):
-		print line.userAgent().pretty(), line.os()
+		print line.userAgent.pretty(), line.os
