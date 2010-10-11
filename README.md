@@ -31,6 +31,7 @@ The futur
 
  - √ Parsing http server log
  - _ Reading stdin
- - _ filling a mongo database
- - _ ip to country
- - _ nice graph from stored data
+ - _ Filling a mongo database
+ - _ IP to country
+ - _ Querying
+ - _ Nice graph from stored data
