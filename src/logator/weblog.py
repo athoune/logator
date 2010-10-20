@@ -49,7 +49,13 @@ class LogLine(object):
 
 class UserAgent(object):
 	def get_userAgent(self):
-		return parser.UserAgent(self.datas['user-agent'])
+		p = parser.UserAgent(self.datas['user-agent'])
+		return {
+			'family' : p.family,
+			'v1' : p.v1,
+			'v2' : p.v2,
+			'v3' : p.v3
+		}
 
 socket.setdefaulttimeout(2)
 
@@ -66,7 +72,11 @@ class IP2Something(object):
 		global ip2
 		if ip2 == None:
 			ip2 = ip2something.Index('ip_group_city.csv')
-		return ip2.search(self.datas['ip'])
+		data = ip2.search(self.datas['ip'])
+		data['loc'] = [data['latitude'], data['longitude']]
+		del data['latitude']
+		del data['longitude']
+		return data
 
 def intOrNull(a):
 	if a == '-': return None
@@ -208,5 +218,5 @@ if __name__ == '__main__':
 	class Line(Lighttpd, UserAgent, HostByName, IP2Something): pass
 	
 	for line in log.log(Line, logs, Filter_by_code([200]) | Filter_by_attribute('command', 'GET')):
-		print line.url, line.userAgent.pretty(), line.os#, line.hostByName
+		#print line.url, line.userAgent, line.os#, line.hostByName
 		print line.as_dict()
