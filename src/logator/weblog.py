@@ -10,6 +10,8 @@ import socket
 import regexes
 import parser
 
+import ip2something
+
 RE_COMMON = re.compile('(.*?) - (.*?) \[(.*?) [+-]\d{4}\] "(.*?) (.*?) (.*?)" (\d{3}) (\d+)', re.U)
 RE_COMBINED = re.compile('(.*?) - (.*?) \[(.*?) [+-]\d{4}\] "(.*?) (.*?) (.*?)" (\d{3}) (.*?) "([^"]*)" "([^"]*)"', re.U)
 RE_LIGHTY = re.compile('(.*?) (.*?) - \[(.*?) [+-]\d{4}\] "(.*?) (.*?) (.*?)" (\d{3}) (.*?) "([^"]*)" "([^"]*)"', re.U)
@@ -38,6 +40,12 @@ class LogLine(object):
 		return infos
 	def __repr__(self):
 		return "<LogLine %s>" % self.datas['url']
+	def as_dict(self):
+		d = self.datas
+		for k in dir(self):
+			if k[:4] == 'get_':
+				d[k[4:]] = self.__getattr__(k[4:])
+		return d
 
 class UserAgent(object):
 	def get_userAgent(self):
@@ -52,7 +60,13 @@ class HostByName(object):
 		except socket.herror:
 			return '?'
 
-
+ip2 = None
+class IP2Something(object):
+	def get_ip2something(self):
+		global ip2
+		if ip2 == None:
+			ip2 = ip2something.Index('ip_group_city.csv')
+		return ip2.search(self.datas['ip'])
 
 def intOrNull(a):
 	if a == '-': return None
@@ -191,8 +205,8 @@ if __name__ == '__main__':
 178.79.135.218 blog.garambrogne.net - [07/Oct/2010:22:40:47 +0200] "HEAD / HTTP/1.1" 200 0 "-" "Mozilla/5.0 (compatible; Wasitup monitoring; http://wasitup.com)"
 """[1:-1].split("\n")
 
-	class Line(Lighttpd, UserAgent, HostByName):
-		pass
+	class Line(Lighttpd, UserAgent, HostByName, IP2Something): pass
 	
 	for line in log.log(Line, logs, Filter_by_code([200]) | Filter_by_attribute('command', 'GET')):
 		print line.url, line.userAgent.pretty(), line.os#, line.hostByName
+		print line.as_dict()
