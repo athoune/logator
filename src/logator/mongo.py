@@ -18,13 +18,20 @@ class MongoStore(object):
 
 if __name__ == '__main__':
 	import sys
-
-	class Line(weblog.Lighttpd): pass
-
+	
 	store = MongoStore()
-	cpt = 0
-	for line in log.log(Line, sys.stdin):
-		cpt +=1
-		if cpt % 5000 == 0:
-			print cpt
-		store.insert(line.as_dict())
+
+	if len(sys.argv) == 1:
+		class Line(weblog.Lighttpd, weblog.IP2Something, weblog.UserAgent): pass
+		cpt = 0
+		for line in log.log(Line, sys.stdin):
+			cpt +=1
+			if cpt % 5000 == 0:
+				print cpt
+			store.insert(line.as_dict())
+	else:
+		print "404 not found :", store.db.logs.find({'code':404}).count()
+		print "User agent :", store.db.logs.distinct('userAgent.family')
+		print "Country :", store.db.logs.distinct('ip2something.country_name')
+		#for log in store.db.logs.find({'code':404}):
+		#	print log
