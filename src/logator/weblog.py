@@ -116,6 +116,8 @@ def combined(line):
 class Lighttpd(LogLine):
 	def parse(self, line):
 		m = RE_LIGHTY.match(line)
+		if m == None:
+			return None
 		return {
 		'ip':     m.group(1),
 		'domain': m.group(2),
