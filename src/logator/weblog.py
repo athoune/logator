@@ -36,7 +36,8 @@ class LogLine(object):
 			args = m.group(2).split('; ')
 			if len(args) > 1 and args[1] == 'U':
 				infos['os'] = args[0]
-				infos['os-version'] = args[2]
+				if len(args) > 2:
+					infos['os-version'] = args[2]
 		return infos
 	def __repr__(self):
 		return "<LogLine %s>" % self.datas['url']
