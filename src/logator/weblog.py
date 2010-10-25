@@ -12,6 +12,8 @@ import parser
 
 import ip2something
 
+from log import InvalidLog
+
 RE_COMMON = re.compile('(.*?) - (.*?) \[(.*?) [+-]\d{4}\] "(.*?) (.*?) (.*?)" (\d{3}) (\d+)', re.U)
 RE_COMBINED = re.compile('(.*?) - (.*?) \[(.*?) [+-]\d{4}\] "(.*?) (.*?) (.*?)" (\d{3}) (.*?) "([^"]*)" "([^"]*)"', re.U)
 RE_LIGHTY = re.compile('(.*?) (.*?) - \[(.*?) [+-]\d{4}\] "(.*?) (.*?) (.*?)" (\d{3}) (.*?) "([^"]*)" "([^"]*)"', re.U)
@@ -86,6 +88,8 @@ def intOrNull(a):
 class Common(LogLine):
 	def parse(self, line):
 		m = RE_COMMON.match(line)
+		if m == None:
+			raise InvalidLog()
 		return {
 		'ip':     m.group(1),
 		'user':   m.group(2),
@@ -96,12 +100,12 @@ class Common(LogLine):
 		'code':   int(m.group(7)),
 		'size':   int(m.group(8))
 		}
-def combined(line):
-	m = RE_COMBINED.match(line)
-	if m == None:
-		print line
-		raise 
-	return {
+class Combined(LogLine):
+	def parse(self, line):
+		m = RE_COMBINED.match(line)
+		if m == None:
+			raise InvalidLog()
+		return {
 		'ip':     m.group(1),
 		'user':   m.group(2),
 		'date':   datetime.strptime(m.group(3), '%d/%b/%Y:%H:%M:%S'),
@@ -117,7 +121,7 @@ class Lighttpd(LogLine):
 	def parse(self, line):
 		m = RE_LIGHTY.match(line)
 		if m == None:
-			return None
+			raise InvalidLog()
 		return {
 		'ip':     m.group(1),
 		'domain': m.group(2),
@@ -181,6 +185,7 @@ if __name__ == '__main__':
 	import log
 	logs = """
 82.246.177.240 blog.garambrogne.net - [07/Oct/2010:21:47:19 +0200] "GET /post/2009/08/12/Trac%2C-un-bien-bel-outil HTTP/1.1" 200 19431 "http://blog.garambrogne.net/post/2009/06/29/Palette" "Mozilla/5.0 (X11; U; Linux i686; fr; rv:1.9.2.10) Gecko/20100915 Ubuntu/10.04 (lucid) Firefox/3.6.10"
+popo
 66.249.65.142 blog.garambrogne.net - [07/Oct/2010:21:48:18 +0200] "GET /public/panoramique/.sous_la_passerelle_t.jpg HTTP/1.1" 200 2391 "-" "Googlebot-Image/1.0"
 204.2.152.3 blog.garambrogne.net - [07/Oct/2010:21:48:58 +0200] "HEAD /post/2010/10/06/Rendre-DotClear-plus-joli-avec-php5.3-fpm-et-lighttpd HTTP/1.1" 200 0 "http://bit.ly/b5NByk" "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.14) Gecko/20080404 Firefox/2.0.0.14"
 178.79.135.218 blog.garambrogne.net - [07/Oct/2010:21:50:47 +0200] "HEAD / HTTP/1.1" 200 0 "-" "Mozilla/5.0 (compatible; Wasitup monitoring; http://wasitup.com)"
@@ -219,7 +224,9 @@ if __name__ == '__main__':
 """[1:-1].split("\n")
 
 	class Line(Lighttpd, UserAgent, HostByName, IP2Something): pass
-	
-	for line in log.log(Line, logs, Filter_by_code([200]) | Filter_by_attribute('command', 'GET')):
-		#print line.url, line.userAgent, line.os#, line.hostByName
-		print line.as_dict()
+	try:
+		for line in log.log(Line, logs, Filter_by_code([200]) | Filter_by_attribute('command', 'GET')):
+			#print line.url, line.userAgent, line.os#, line.hostByName
+			print line.as_dict()
+	except InvalidLog:
+		print "oups"
