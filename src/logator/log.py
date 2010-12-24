@@ -13,8 +13,6 @@ class LazyDict(object):
 		if name not in self._cache:
 			self._cache[name] = self.__getattribute__("get_%s" % name).__call__()
 		return self._cache[name]
-	def __len__(self):
-		return len(datas)
 
 class InvalidLog(Exception): pass
 
