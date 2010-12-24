@@ -4,6 +4,12 @@ Logator
 Build your own log parser.
 
 
+Installing it
+-------------
+
+	python setup.py build
+	sudo python setup.py install
+
 Using it
 --------
 
@@ -14,7 +20,7 @@ Logator handles lazy loading and memoization.
 
 You can use filters.
 
-User Agent parsing is stolen from Google code.
+User Agent parsing is stolen from Google code : http://code.google.com/p/ua-parser/.
 
 	from logator.log import log
 	from logator.weblog import Common, UserAgent, HostByName, Filter_by_code, Filter_by_attribute
@@ -32,6 +38,6 @@ The futur
  - √ Parsing http server log
  - _ Reading stdin
  - _ Filling a mongo database
- - _ IP to country
+ - √ IP to country
  - _ Querying
  - _ Nice graph from stored data
