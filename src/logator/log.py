@@ -28,7 +28,7 @@ class LazyDict(object):
 class LogLine(LazyDict):
 	def __init__(self, line):
 		LazyDict.__init__(self)
-		self.datas = self.parse(line)
+		self.parse(line)
 	def __repr__(self):
 		return "<LogLine %s>" % self.datas['url']
 	def parse(self, line):
