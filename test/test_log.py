@@ -18,6 +18,10 @@ class LazyDictTest(unittest.TestCase):
 		self.assertEqual(42, d.foo)
 		#dynamic but cached
 		self.assertEqual(42, d.foo)
+	def test_iter(self):
+		d = DummyDict()
+		d.datas['spam'] = 'eggs'
+		self.assertEqual(set(['spam', 'foo']), set(d))
 
 if __name__ == '__main__':
     unittest.main()

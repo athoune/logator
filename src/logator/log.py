@@ -13,6 +13,27 @@ class LazyDict(object):
 		if name not in self._cache:
 			self._cache[name] = self.__getattribute__("get_%s" % name).__call__()
 		return self._cache[name]
+	def __iter__(self):
+		for a in self.datas:
+			yield a
+		for k in dir(self):
+			if k[:4] == 'get_':
+				yield k[4:]
+	def as_dict(self):
+		d = self.datas
+		for k in dir(self):
+			if k[:4] == 'get_':
+				d[k[4:]] = self.__getattr__(k[4:])
+
+class LogLine(LazyDict):
+	def __init__(self, line):
+		LazyDict.__init__(self)
+		self.datas = self.parse(line)
+	def __repr__(self):
+		return "<LogLine %s>" % self.datas['url']
+	def parse(self, line):
+		raise Exception('not implemented')
+		return d
 
 class InvalidLog(Exception): pass
 
