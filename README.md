@@ -13,30 +13,41 @@ Installing it
 Using it
 --------
 
-Log is handled as an iterable lines object. The basic example is a file.
+You need a **source**. Something wich iterate log line. The simplest way is STDIN and files, but you can also use syslogd protocol or more complex source.
 
-You build your own parser with multiple heritage. Attributes can be static (from a regex parsing) or dynamic.
-Logator handles lazy loading and memoization.
+For reading loglines, you need a **reader**. Reader is basically a regex with simple string manipulations. You can add dynamic getter for castly query (ip to country for example).
+Dynamic attributes are lazy loaded and memoized.
 
-You can use filters.
+Query is done with **filter**, wich can be piped.
 
-User Agent parsing is stolen from Google code : http://code.google.com/p/ua-parser/.
+Result can be return as dict wich can be easily serialized if you wont to index it or storing it.
 
 	from logator.log import log
 	from logator.weblog import Common, UserAgent, HostByName, Filter_by_code, Filter_by_attribute
 	
-	class Line(Common, UserAgent, HostByName):
-		pass
+	#The filter
+	filtr = Filter_by_code([200]) | Filter_by_attribute('command', 'GET')
 	
-	f = open('/var/log/apache2/access.log', 'r')
-	for line in log(Line, f, Filter_by_code([200]) | Filter_by_attribute('command', 'HEAD')):
-		print line.url, line.userAgent.pretty(), line.os#, line.hostByName
+	#The source
+	logs = open('/var/log/apache2/access.log', 'r')
+	
+	#Lighttpd is the reader with two dynamic attributes reader : UserAgent, HostByName
+	for line in filtr.filter(logs, Lighttpd, UserAgent, HostByName):
+		print line.as_dict()
+
+User Agent parsing is stolen from Google code : http://code.google.com/p/ua-parser/.
+
 
 The futur
 ---------
 
+ - √ Filter
+ - √ Dynamic attributes
  - √ Parsing http server log
+ - _ Parsing mail log (postfix + amavis)
  - _ Reading stdin
+ - _ Reading syslog protocol
+ - _ Reading "à la" tail -f
  - _ Filling a mongo database
  - √ IP to country
  - _ Querying
