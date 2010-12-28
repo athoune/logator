@@ -4,9 +4,8 @@
 __author__ = "Mathieu Lecarme <mathieu@garambrogne.net>"
 
 class LazyDict(object):
-	def __init__(self):
-		self.datas = {}
-		self._cache = {}
+	datas = {}
+	_cache = {}
 	def __getattr__(self, name):
 		if name in self.datas:
 			return self.datas[name]
@@ -19,21 +18,22 @@ class LazyDict(object):
 		for k in dir(self):
 			if k[:4] == 'get_':
 				yield k[4:]
+
+class AsDict(object):
 	def as_dict(self):
 		d = self.datas
 		for k in dir(self):
 			if k[:4] == 'get_':
 				d[k[4:]] = self.__getattr__(k[4:])
+		return d
 
-class LogLine(LazyDict):
+class LogLine(LazyDict, AsDict):
 	def __init__(self, line):
-		LazyDict.__init__(self)
 		self.parse(line)
 	def __repr__(self):
 		return "<LogLine %s>" % self.datas['url']
 	def parse(self, line):
 		raise Exception('not implemented')
-		return d
 
 class InvalidLog(Exception): pass
 

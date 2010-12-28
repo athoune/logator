@@ -47,10 +47,7 @@ popo
 178.79.135.218 blog.garambrogne.net - [07/Oct/2010:22:40:47 +0200] "HEAD / HTTP/1.1" 200 0 "-" "Mozilla/5.0 (compatible; Wasitup monitoring; http://wasitup.com)"
 """[1:-1].split("\n")
 
-class Line(Lighttpd, UserAgent, HostByName): pass
-try:
-	for line in log(Line, logs, Filter_by_code([200]) | Filter_by_attribute('command', 'GET')):
-		#print line.url, line.userAgent, line.os#, line.hostByName
-		print line.as_dict()
-except InvalidLog:
-	print "oups"
+filtr = Filter_by_code([200]) | Filter_by_attribute('command', 'GET')
+
+for line in filtr.filter(logs, Lighttpd, UserAgent, HostByName):
+	print line.as_dict()

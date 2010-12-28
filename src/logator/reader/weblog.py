@@ -12,7 +12,7 @@ import parser
 
 import ip2something
 
-from logator.log import InvalidLog
+from logator.log import InvalidLog, LogLine
 from logator.filter import Filter, Filter_by_attribute
 
 RE_COMMON = re.compile('(.*?) - (.*?) \[(.*?) [+-]\d{4}\] "(.*?) (.*?) (.*?)" (\d{3}) (\d+)', re.U)
@@ -21,17 +21,7 @@ RE_LIGHTY = re.compile('(.*?) (.*?) - \[(.*?) [+-]\d{4}\] "(.*?) (.*?) (.*?)" (\
 RE_OS = re.compile('(.*?) \((.*?)\)', re.U)
 RE_MOZILLA = re.compile('.*? \((.*?); U; (.*?);', re.U)
 
-class LogLine(object):
-	def __init__(self, line):
-		self.datas = self.parse(line)
-		self._cache = {}
-	def __getattr__(self, name):
-		if name in self.datas:
-			return self.datas[name]
-		if name not in self._cache:
-			self._cache[name] = self.__getattribute__("get_%s" % name).__call__()
-		return self._cache[name]
-			
+class WebLine(LogLine):
 	def get_os(self):
 		m = RE_OS.match(self.datas['user-agent'])
 		infos = {}
@@ -44,12 +34,6 @@ class LogLine(object):
 		return infos
 	def __repr__(self):
 		return "<LogLine %s>" % self.datas['url']
-	def as_dict(self):
-		d = self.datas
-		for k in dir(self):
-			if k[:4] == 'get_':
-				d[k[4:]] = self.__getattr__(k[4:])
-		return d
 
 class UserAgent(object):
 	def get_userAgent(self):
@@ -86,12 +70,12 @@ def intOrNull(a):
 	if a == '-': return None
 	return int(a)
 
-class Common(LogLine):
+class Common(WebLine):
 	def parse(self, line):
 		m = RE_COMMON.match(line)
 		if m == None:
 			raise InvalidLog()
-		return {
+		self.datas = {
 		'ip':     m.group(1),
 		'user':   m.group(2),
 		'date':   datetime.strptime(m.group(3), '%d/%b/%Y:%H:%M:%S'),
@@ -101,12 +85,12 @@ class Common(LogLine):
 		'code':   int(m.group(7)),
 		'size':   int(m.group(8))
 		}
-class Combined(LogLine):
+class Combined(WebLine):
 	def parse(self, line):
 		m = RE_COMBINED.match(line)
 		if m == None:
 			raise InvalidLog()
-		return {
+		self.datas = {
 		'ip':     m.group(1),
 		'user':   m.group(2),
 		'date':   datetime.strptime(m.group(3), '%d/%b/%Y:%H:%M:%S'),
@@ -118,12 +102,12 @@ class Combined(LogLine):
 		'referer':m.group(9),
 		'user-agent':m.group(10)
 		}
-class Lighttpd(LogLine):
+class Lighttpd(WebLine):
 	def parse(self, line):
 		m = RE_LIGHTY.match(line)
 		if m == None:
 			raise InvalidLog()
-		return {
+		self.datas = {
 		'ip':     m.group(1),
 		'domain': m.group(2),
 		'date':   datetime.strptime(m.group(3), '%d/%b/%Y:%H:%M:%S'),
