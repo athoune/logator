@@ -26,7 +26,7 @@ Result can be return as dict wich can be easily serialized if you wont to index 
 	from logator.weblog import Common, UserAgent, HostByName, Filter_by_code, Filter_by_attribute
 	
 	#The filter
-	filtr = Filter_by_code([200]) | Filter_by_attribute('command', 'GET')
+	filtr = Filter_by_code(200) | Filter_by_attribute('command', 'GET')
 	
 	#The source
 	logs = open('/var/log/apache2/access.log', 'r')
