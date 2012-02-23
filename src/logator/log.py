@@ -1,17 +1,20 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 __author__ = "Mathieu Lecarme <mathieu@garambrogne.net>"
 
 class LazyDict(object):
-    datas = {}
-    _cache = {}
+
+    def __init__(self):
+        self.datas = {}
+        self._cache = {}
+
     def __getattr__(self, name):
         if name in self.datas:
             return self.datas[name]
         if name not in self._cache:
             self._cache[name] = self.__getattribute__("get_%s" % name).__call__()
         return self._cache[name]
+
     def __iter__(self):
         for a in self.datas:
             yield a
@@ -19,7 +22,9 @@ class LazyDict(object):
             if k[:4] == 'get_':
                 yield k[4:]
 
+
 class AsDict(object):
+
     def as_dict(self):
         d = self.datas
         for k in dir(self):
@@ -27,13 +32,20 @@ class AsDict(object):
                 d[k[4:]] = self.__getattr__(k[4:])
         return d
 
+
 class LogLine(LazyDict, AsDict):
+
     def __init__(self, line):
+        LazyDict.__init__(self)
+        AsDict.__init__(self)
         self.parse(line)
+
     def __repr__(self):
         return "<LogLine %s>" % self.datas['url']
+
     def parse(self, line):
         raise Exception('not implemented')
+
 
 class InvalidLog(Exception): pass
 

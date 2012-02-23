@@ -1,10 +1,10 @@
 import sys
-import os.path
+import os
 import unittest
 
-sys.path.insert(0, os.path.abspath('../src/'))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../src/')))
 
-from logator.reader.weblog import Lighttpd, UserAgent, HostByName, IP2Something, Filter_by_code, Filter_by_attribute
+from logator.reader.weblog import Lighttpd, UserAgent, HostByName, Filter_by_code, Filter_by_attribute
 from logator.log import InvalidLog, log
 
 logs = """
@@ -47,7 +47,7 @@ popo
 178.79.135.218 blog.garambrogne.net - [07/Oct/2010:22:40:47 +0200] "HEAD / HTTP/1.1" 200 0 "-" "Mozilla/5.0 (compatible; Wasitup monitoring; http://wasitup.com)"
 """[1:-1].split("\n")
 
-filtr = Filter_by_code([200]) | Filter_by_attribute('command', 'GET')
+filtr = Filter_by_code(200) | Filter_by_attribute('command', 'GET')
 
 for line in filtr.filter(logs, Lighttpd, UserAgent, HostByName):
-	print line.as_dict()
+    print line.as_dict()

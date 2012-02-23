@@ -13,6 +13,6 @@ setup(name='logator',
       packages=['logator'],
       keywords= ["log"],
       zip_safe = True,
-      install_requires=["ip2something"],
+      install_requires=["pyyaml"],
 
       )

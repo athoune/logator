@@ -7,10 +7,7 @@ import re
 from datetime import datetime
 import socket
 
-import regexes
-import parser
-
-import ip2something
+import user_agent_parser
 
 from logator.log import InvalidLog, LogLine
 from logator.filter import Filter, Filter_by_attribute
@@ -22,6 +19,7 @@ RE_OS = re.compile('(.*?) \((.*?)\)', re.U)
 RE_MOZILLA = re.compile('.*? \((.*?); U; (.*?);', re.U)
 
 class WebLine(LogLine):
+
     def get_os(self):
         m = RE_OS.match(self.datas['user-agent'])
         infos = {}
@@ -32,45 +30,42 @@ class WebLine(LogLine):
                 if len(args) > 2:
                     infos['os-version'] = args[2]
         return infos
+
     def __repr__(self):
-        return "<LogLine %s>" % self.datas['url']
+        return "<LogLine >"
+
 
 class UserAgent(object):
+
     def get_userAgent(self):
-        p = parser.UserAgent(self.datas['user-agent'])
+        p = user_agent_parser.ParseUserAgent(self.datas['user-agent'])
         return {
-            'family' : p.family,
-            'v1' : p.v1,
-            'v2' : p.v2,
-            'v3' : p.v3
+            'family' : p['family'],
+            'v1' : p['v1'],
+            'v2' : p['v2'],
+            'v3' : p['v3']
         }
+
 
 socket.setdefaulttimeout(2)
 
 class HostByName(object):
+
     def get_hostByName(self):
         try:
             return socket.gethostbyaddr(self.datas['ip'])[0]
         except socket.herror:
             return '?'
 
-ip2 = None
-class IP2Something(object):
-    def get_ip2something(self):
-        global ip2
-        if ip2 == None:
-            ip2 = ip2something.Index('ip_group_city.csv')
-        data = ip2.search(self.datas['ip'])
-        data['loc'] = [data['latitude'], data['longitude']]
-        del data['latitude']
-        del data['longitude']
-        return data
 
 def intOrNull(a):
-    if a == '-': return None
+    if a == '-':
+        return None
     return int(a)
 
+
 class Common(WebLine):
+
     def parse(self, line):
         m = RE_COMMON.match(line)
         if m == None:
@@ -85,7 +80,10 @@ class Common(WebLine):
         'code':   int(m.group(7)),
         'size':   int(m.group(8))
         }
+
+
 class Combined(WebLine):
+
     def parse(self, line):
         m = RE_COMBINED.match(line)
         if m == None:
@@ -102,7 +100,10 @@ class Combined(WebLine):
         'referer':m.group(9),
         'user-agent':m.group(10)
         }
+
+
 class Lighttpd(WebLine):
+
     def parse(self, line):
         m = RE_LIGHTY.match(line)
         if m == None:
@@ -120,18 +121,26 @@ class Lighttpd(WebLine):
         'user-agent':m.group(10)
         }
 
+
 class Filter_by_code(Filter_by_attribute):
-    def __init__(self, codes = [404]):
+
+    def __init__(self, *codes):
         self.key = 'code'
         self.value = codes
 
+
 class Filter_by_error(Filter_by_code):
+
     def __init__(self):
-        Filter_by_code.__init__(self, [403, 404, 500, 501, 502])
+        Filter_by_code.__init__(self, 403, 404, 500, 501, 502)
+
 
 class Filter_by_domain(Filter):
-    def __init__(self, domain=['net']):
+
+    def __init__(self, *domain):
         self.domain = domain
+
     def __call__(self, logline):
         if logline.hostByName.split('.')[-1] in self.domain:
             return logline
+
