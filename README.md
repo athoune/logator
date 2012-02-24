@@ -22,24 +22,23 @@ Query is done with **filter**, wich can be piped.
 
 Result can be return as dict wich can be easily serialized if you wont to index it or storing it.
 
-	from logator.log import log
-	from logator.weblog import Common, UserAgent, HostByName, Filter_by_code, Filter_by_attribute
-	
-	#The filter
-	filtr = Filter_by_code(200) | Filter_by_attribute('command', 'GET')
-	
-	#The source
-	logs = open('/var/log/apache2/access.log', 'r')
-	
-	#Lighttpd is the reader with two dynamic attributes reader : UserAgent, HostByName
-	for line in filtr.filter(logs, Lighttpd, UserAgent, HostByName):
-		print line.as_dict()
+```python
+from logator.log import log
+from logator.weblog import Common, UserAgent, HostByName, Filter_by_code, Filter_by_attribute
+#The filter
+filtr = Filter_by_code(200) | Filter_by_attribute('command', 'GET')
+#The source
+logs = open('/var/log/apache2/access.log', 'r')
+#Lighttpd is the reader with two dynamic attributes reader : UserAgent, HostByName
+for line in filtr.filter(logs, Lighttpd, UserAgent, HostByName):
+    print line.as_dict()
+```
 
 User Agent parsing is stolen from Google code : http://code.google.com/p/ua-parser/.
 
 
-The futur
----------
+The future
+----------
 
  - √ Filter
  - √ Dynamic attributes
@@ -52,3 +51,8 @@ The futur
  - √ IP to country
  - _ Querying
  - _ Nice graph from stored data
+
+Licence
+-------
+
+MIT, 2012 © Mathieu Lecarme
