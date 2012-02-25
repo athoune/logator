@@ -19,6 +19,7 @@
 import os
 import re
 import yaml
+from pkg_resources import resource_filename
 
 class UserAgentParser(object):
   def __init__(self, pattern, family_replacement=None, v1_replacement=None):
@@ -342,7 +343,8 @@ def GetFilters(user_agent_string, js_user_agent_string=None,
 
 # Build the list of user agent parsers from YAML
 rootDir = os.path.abspath(os.path.dirname(__file__))
-yamlFile = open(rootDir + '/resources/user_agent_parser.yaml')
+#yamlFile = open(rootDir + '/resources/user_agent_parser.yaml')
+yamlFile = open(resource_filename(__name__, '/resources/user_agent_parser.yaml'))
 yaml = yaml.load(yamlFile)
 yamlFile.close()
 

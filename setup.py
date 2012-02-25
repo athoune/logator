@@ -30,7 +30,7 @@ Ready to use parser for apache like logs.
     license="MIT",
     author="Mathieu Lecarme",
     packages= find_packages('src'),
-    package_data = {"": ["**/*.yaml"]},
+    package_data = {"logator": ["**/*.yaml"]},
     keywords= ["log"],
     zip_safe = True,
     install_requires=["pyyaml"],
