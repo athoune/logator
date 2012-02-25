@@ -2,13 +2,13 @@
 
 import sys
 
-from inversedb.indx import MemoryIndex
-from logator.log import Lighttpd, UserAgent, Filter_by_code
+from inversedb.index import MemoryIndex
+from logator.reader.weblog import Lighttpd, UserAgent, Filter_by_code
 
 def main():
     idx = MemoryIndex()
     filtr = Filter_by_code(200)
-    for line in filtr.filtr(sys.stdin, Lighttpd, UserAgent):
+    for line in filtr.filter(sys.stdin, Lighttpd, UserAgent):
         print line.as_dict()
 
 if __name__ == '__main__':

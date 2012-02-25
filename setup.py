@@ -1,11 +1,9 @@
-#!/usr/bin/env python
-
-from setuptools import setup
+from setuptools import setup, find_packages
 
 # http://pypi.python.org/pypi?%3Aaction=list_classifiers
 
 setup(name='logator',
-    version='0.2',
+    version='0.2.1',
     package_dir={'': 'src'},
     url='http://github.com/athoune/logator',
     #scripts=[],
@@ -31,7 +29,8 @@ Ready to use parser for apache like logs.
         ],
     license="MIT",
     author="Mathieu Lecarme",
-    packages=['logator'],
+    packages= find_packages('src'),
+    package_data = {"": ["**/*.yaml"]},
     keywords= ["log"],
     zip_safe = True,
     install_requires=["pyyaml"],
