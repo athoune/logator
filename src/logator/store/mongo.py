@@ -42,7 +42,8 @@ if __name__ == '__main__':
     store = MongoStore()
 
     if len(sys.argv) == 1:
-        class Line(weblog.Lighttpd, weblog.IP2Something, weblog.UserAgent): pass
+        class Line(weblog.Lighttpd, weblog.IP2Something, weblog.UserAgent):
+            pass
         store.bulk_insert(log.log(Line, sys.stdin))
     else:
         store.db.logs.ensure_index('code')

@@ -2,6 +2,7 @@
 
 __author__ = "Mathieu Lecarme <mathieu@garambrogne.net>"
 
+
 class LazyDict(object):
 
     def __init__(self):
@@ -47,16 +48,18 @@ class LogLine(LazyDict, AsDict):
         raise Exception('not implemented')
 
 
-class InvalidLog(Exception): pass
+class InvalidLog(Exception):
+    pass
 
-def log(parser, reader, filter_ = None):
+
+def log(parser, reader, filter_=None):
     for line in reader:
-        if filter_ == None:
+        if filter_ is None:
             yield parser.__call__(line)
         else:
             try:
                 tmp = filter_.__call__(parser.__call__(line))
             except InvalidLog:
                 print "oups"
-            if tmp != None: yield tmp
-
+            if tmp is not None:
+                yield tmp

@@ -48,6 +48,7 @@ facilities = [
     "local use 7"
 ]
 
+
 class SyslogInput(DatagramProtocol):
     """
     Syslog UDP listener
@@ -58,12 +59,13 @@ class SyslogInput(DatagramProtocol):
         override me !
         """
         print "\x1b[31m%s\x1b[39;49;00m\x1b[32m@%s\x1b[39;49;00m [\x1b[33m%s\x1b[39;49;00m] %s" % (levels[level], host, facilities[facility], msg)
+
     def datagramReceived(self, data, (host, port)):
         n = data.find(">")
         a = int(data[1:n])
         level = a & 0b00000111
         facility = (a & 0b01111000) / 8
-        (month, day, hour, host, msg) = data[n+1:].split(' ', 4)
+        (month, day, hour, host, msg) = data[n + 1:].split(' ', 4)
         self.processLine(level, facility, month, day, hour, host, msg)
 
 if __name__ == '__main__':

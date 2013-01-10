@@ -18,7 +18,7 @@ class Filter(object):
         for line in iterable:
             try:
                 tmp = self.__call__(c(line))
-                if tmp != None:
+                if tmp is not None:
                     yield tmp
             except InvalidLog:
                 pass
@@ -32,14 +32,15 @@ class MetaFilter(Filter):
     def append(self, other):
         self.filters.append(other)
 
-    def __or__(self,other):
+    def __or__(self, other):
         self.append(other)
         return self
 
     def __call__(self, data):
         for filter_ in self.filters:
             data = filter_.__call__(data)
-            if data == None: return None
+            if data is None:
+                return None
         return data
 
 

@@ -3,10 +3,9 @@
 
 __author__ = "Mathieu Lecarme <mathieu@garambrogne.net>"
 
-import re
-from datetime import datetime
 
 from logator.reader.syslog import SyslogLine
+
 
 class PostfixLine(SyslogLine):
     def parse_msg(self, line):

@@ -21,4 +21,3 @@ for line in sys.stdin:
 while True:
     msg = s.recv(copy=False)
     s.send('')
-
